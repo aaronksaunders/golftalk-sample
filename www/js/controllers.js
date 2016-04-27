@@ -3,8 +3,8 @@ angular.module('starter.controllers', [])
     BASE_URL: 'https://clearlyinnovative-firebasestarterapp.firebaseio.com/'
   })
 
-  .controller('DashCtrl', function ($scope) { 
-    
+  .controller('DashCtrl', function ($scope) {
+
   })
 
   .controller('ChatsCtrl', function ($scope, $timeout, FIREBASE_CONFIG, Chats) {
@@ -24,6 +24,11 @@ angular.module('starter.controllers', [])
 
     $scope.inputtext = ""
 
+    /**
+     * called when the users clicks submit to add a new message
+     * 
+     * @param _data {String} text entered for the message
+     */
     $scope.addMessage = function (_data, _selectedChat) {
       var _selectedChat = _selectedChat || 'saturday-chat'
       var baseRef = new Firebase(FIREBASE_CONFIG.BASE_URL);
@@ -34,6 +39,7 @@ angular.module('starter.controllers', [])
     function getFBChats(_selectedChat) {
 
       var _selectedChat = _selectedChat || 'saturday-chat'
+
       var baseRef = new Firebase(FIREBASE_CONFIG.BASE_URL);
       var ref = baseRef.child('Trash-Talk/' + _selectedChat);
       ref.on("value", function (snapshot) {
@@ -50,6 +56,7 @@ angular.module('starter.controllers', [])
       });
     }
 
+    // start here..
     getFBChats();
   })
 
