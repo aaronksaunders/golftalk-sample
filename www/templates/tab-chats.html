@@ -1,0 +1,27 @@
+<ion-view hasHeader view-title="Chats">
+
+  <ion-content>
+    <ion-list>
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Your own content" ng-model="inputtext" required> 
+        </label>
+        <button ng-click="addMessage(inputtext)" class="button button-small" ng-disabled="inputtext.$invalid">
+              Submit
+        </button>
+      </div>
+      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="chat in chats" type="item-text-wrap" href="#/tab/chats/{{chat.id}}">
+        <img ng-src="">
+        <h2>{{chat.player}}</h2>
+        <p>{{chat.message}}</p>
+        <i class="icon ion-chevron-right icon-accessory"></i>
+
+        <ion-option-button class="button-assertive" ng-click="remove(chat)">
+          Delete
+        </ion-option-button>
+      </ion-item>
+    </ion-list>
+
+  </ion-content>
+
+</ion-view>
