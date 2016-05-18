@@ -1,0 +1,14 @@
+<ion-view view-title="Photos">
+  <ion-nav-buttons side="primary">
+    <button class="button" ng-click="doAddPhoto()">
+        PHOTO
+      </button>
+  </ion-nav-buttons>
+  <ion-content class="padding">
+    <ion-list class="list card">
+    <div class="item item-image" ng-repeat="image in images">
+      <img ng-src={{image.imageURL}}>
+    </div>
+    </ion-list>
+  </ion-content>
+</ion-view>
