@@ -1,7 +1,4 @@
 angular.module('starter.controllers', [])
-  .value("FIREBASE_CONFIG", {
-    BASE_URL: 'https://clearlyinnovative-firebasestarterapp.firebaseio.com/'
-  })
 
   .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB) {
 
@@ -57,7 +54,7 @@ angular.module('starter.controllers', [])
     getFBPhotos();
   })
 
-  .controller('ChatsCtrl', function ($scope, $timeout, FIREBASE_CONFIG, Chats, FirebaseDB) {
+  .controller('ChatsCtrl', function ($scope, $timeout, Chats, FirebaseDB) {
     // With the new view caching in Ionic, Controllers are only called
     // when they are recreated or on app start, instead of every page change.
     // To listen for when this page is active (for example, to refresh data),
