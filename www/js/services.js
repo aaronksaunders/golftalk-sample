@@ -9,10 +9,10 @@ angular.module('starter.services', [])
 
         // Initialize Firebase
         var config = {
-          apiKey: "AIzaSyDVgjc8ph0ZfgUV3YfN2J0OvfOz2xAWZug",
-          authDomain: "newfirebaseapp-2ee6f.firebaseapp.com",
-          databaseURL: "https://newfirebaseapp-2ee6f.firebaseio.com",
-          storageBucket: "newfirebaseapp-2ee6f.appspot.com",
+          apiKey: "AIzaSyDVgjc8ph0ZFGUV3YfN2J0OvfOz2xAWZug",
+          authDomain: "newfirebaseapp.firebaseapp.com",
+          databaseURL: "https://newfirebaseapp.firebaseio.com",
+          storageBucket: "newfirebaseapp.appspot.com",
         };
         instance = firebase.initializeApp(config);
         storageInstance = firebase.storage();
