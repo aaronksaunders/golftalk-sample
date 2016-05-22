@@ -24,10 +24,10 @@ angular.module('starter.controllers', [])
         });
 
       }
-      
-            /**
-       * 
-       */
+
+      /**
+      * 
+      */
       $scope.doCreateUserAction = function (_credentials) {
 
         FirebaseDB.createUser(_credentials).then(function (authData) {

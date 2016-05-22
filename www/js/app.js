@@ -71,9 +71,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
           user: ['FirebaseDB', '$q', function (FirebaseDB, $q) {
 
             var authData = FirebaseDB.currentUser();
-
-            console.log('resolvoing user status tab', authData)
-
             return $q(function (resolve, reject) {
               authData ? resolve(authData) : reject("NO USER")
             })
