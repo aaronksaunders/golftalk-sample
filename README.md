@@ -1,5 +1,5 @@
 # golftalk-sample
-Sample Application using using the new features of Firebase
+Sample Application using using the new features of Firebase - This is NOT using AngularFire
 
 - email loging and account creation
 - simple data object database and retriveal in the database
