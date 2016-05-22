@@ -104,11 +104,11 @@ I will discuss the specifics when covering authentication, but for the working w
 
 ### Login & Authentication
   How this works...
-  - Go to default route when app starts up
+  - Go to default route, `tab.chats`, when app starts up
   - If I have user, then I am happy and I list the data
-  - If I dont have user then resolve fails and login state is transistioned to
-  - In the login state, initialize the app and check for a user or not
-  - If I have a user then list state is transistioned to, otherwise display login screen
+  - If I dont have user then resolve fails and login state, `login`, is transistioned to
+  - In the login state, initialize the app and check for a user or not using the `FirebaseDB` Service calling the `initialize()` function
+  - If I have a user then list state, `tab.chats`, is transistioned to, otherwise display login screen from `login` state
 
 
 ### Create User
