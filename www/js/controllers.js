@@ -1,16 +1,36 @@
 angular.module('starter.controllers', [])
 
-  .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB) {
+  .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB, $cordovaImagePicker, $ionicPopup) {
+
+    function pickTheImage() {
+      var options = {
+        maximumImagesCount: 1,
+        width: 320,
+        quality: 80
+      };
+
+      return $cordovaImagePicker.getPictures(options)
+        .then(function (results) {
+          for (var i = 0; i < results.length; i++) {
+            console.log('Image URI: ' + results[i]);
+          }
+          return results[0];
+
+        }, function (error) {
+          // error getting photos
+        });
+    }
 
     /**
-     * 
+     * @param  {any} _image
+     * @param  {any} _title
      */
-    $scope.doAddPhoto = function () {
+    function processImage(_image, _title) {
 
-      fetch('img/adam.jpg').then(function (_data) {
+      return fetch(_image).then(function (_data) {
         return _data.blob()
       }).then(function (_blob) {
-        uploadTask = FirebaseDB.storage().ref('images/adam.jpg').put(_blob)
+        uploadTask = FirebaseDB.storage().ref('images/' + _title + '.jpg').put(_blob)
 
         uploadTask.on('state_changed', function (snapshot) {
           // Observe state change events such as progress, pause, and resume
@@ -21,6 +41,7 @@ angular.module('starter.controllers', [])
           // Handle successful uploads on complete..
           var downloadURL = uploadTask.snapshot.downloadURL;
 
+          // save a reference to the image for listing purposes
           var ref = FirebaseDB.database().ref('Trash-Talk/images');
           ref.push({ imageURL: downloadURL, 'when': new Date() });
 
@@ -28,9 +49,25 @@ angular.module('starter.controllers', [])
         });
       })
     }
+    /**
+     * @param  {any} _title
+     */
+    $scope.doAddPhoto = function () {
+      pickTheImage().then(function (_image) {
+
+        $timeout(function () {
+          return $ionicPopup.prompt({
+            title: 'Please enter title for the image'
+          }).then(function (_title) {
+            return processImage(_image, _title)
+          });
+        }, 1);
+
+      })
+    }
 
     /**
-     * 
+     * @param  {String} _selectedChat
      */
     function getFBPhotos(_selectedChat) {
 
