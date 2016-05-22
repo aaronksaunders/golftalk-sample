@@ -5,9 +5,9 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','ngCordova'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'ngCordova'])
 
-  .run(function ($ionicPlatform, FirebaseDB) {
+  .run(function ($ionicPlatform, FirebaseDB, $rootScope, $state) {
     $ionicPlatform.ready(function () {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
@@ -22,7 +22,18 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       }
     });
 
-    FirebaseDB.initialize()
+    // for authentication
+    $rootScope.$on('$stateChangeError',
+      function (event, toState, toParams, fromState, fromParams, error) {
+
+        // if the error is "noUser" the go to login state
+        if (error === "NO USER") {
+          event.preventDefault();
+          console.log("go to login state");
+          $state.go('login', {});
+        }
+      });
+
   })
 
   .config(function ($stateProvider, $urlRouterProvider) {
@@ -32,19 +43,47 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
     // Set up the various states which the app can be in.
     // Each state's controller can be found in controllers.js
     $stateProvider
-
+      .state('login', {
+        url: "/login",
+        templateUrl: "templates/login.html",
+        controller: 'LoginCtrl',
+        cache: false,
+        resolve: {
+          user: function (FirebaseDB, $state) {
+            return FirebaseDB.initialize().then(function (_response) {
+              if (_response) {
+                // no user, do the login
+                return true
+              } else {
+                // go user, goto chats
+                $state.go('tab.chats')
+              }
+            })
+          }
+        }
+      })
       // setup an abstract state for the tabs directive
       .state('tab', {
         url: '/tab',
         abstract: true,
-        templateUrl: 'templates/tabs.html'
+        templateUrl: 'templates/tabs.html',
+        resolve: {
+          user: ['FirebaseDB', '$q', function (FirebaseDB, $q) {
+
+            var authData = FirebaseDB.currentUser();
+
+            console.log('resolvoing user status tab', authData)
+
+            return $q(function (resolve, reject) {
+              authData ? resolve(authData) : reject("NO USER")
+            })
+          }]
+        }
       })
-
       // Each tab has its own nav history stack:
-
       .state('tab.chats', {
         url: '/chats',
-        cache: false,
+        cache: true,
         views: {
           'tab-chats': {
             templateUrl: 'templates/tab-chats.html',
@@ -63,6 +102,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       })
       .state('tab.photos', {
         url: '/photos',
+        cache: true,
         views: {
           'tab-photos': {
             templateUrl: 'templates/tab-photos.html',

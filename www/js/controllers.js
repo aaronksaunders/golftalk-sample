@@ -1,4 +1,30 @@
 angular.module('starter.controllers', [])
+  //
+  // A simple controller that logs in a user
+  //
+  .controller('LoginCtrl', [
+    '$scope', '$state', '$timeout', 'FirebaseDB',
+    function LoginCtrl($scope, $state, $timeout, FirebaseDB) {
+      console.log("Login Controller");
+
+      /**
+       * 
+       */
+      $scope.doLoginAction = function (_credentials) {
+
+        FirebaseDB.login(_credentials).then(function (authData) {
+          console.log("Logged in as:", authData.uid);
+          $state.go('tab.chats', {})
+        }).catch(function (error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.error("Authentication failed:", error);
+          // ...
+        });
+
+      }
+    }])
 
   .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB, $cordovaImagePicker, $ionicPopup) {
 
@@ -43,7 +69,11 @@ angular.module('starter.controllers', [])
 
           // save a reference to the image for listing purposes
           var ref = FirebaseDB.database().ref('Trash-Talk/images');
-          ref.push({ imageURL: downloadURL, 'when': new Date() });
+          ref.push({
+            'imageURL': downloadURL,
+            'owner': FirebaseDB.currentUser().uid,
+            'when': new Date().getTime(),
+          });
 
           return downloadURL
         });
@@ -91,7 +121,7 @@ angular.module('starter.controllers', [])
     getFBPhotos();
   })
 
-  .controller('ChatsCtrl', function ($scope, $timeout, Chats, FirebaseDB) {
+  .controller('ChatsCtrl', function ($scope, $timeout, Chats, FirebaseDB, $state) {
     // With the new view caching in Ionic, Controllers are only called
     // when they are recreated or on app start, instead of every page change.
     // To listen for when this page is active (for example, to refresh data),
@@ -105,8 +135,16 @@ angular.module('starter.controllers', [])
       Chats.remove(chat);
     };
 
+    $scope.doLogout = function () {
+      $timeout(function () {
+        $state.go('login', {})
+      }, 1);
 
-    $scope.inputtext = ""
+      firebase.auth().signOut()
+
+    }
+
+    $scope.inputtext = {}
 
     /**
      * called when the users clicks submit to add a new message
@@ -114,28 +152,24 @@ angular.module('starter.controllers', [])
      * @param _data {String} text entered for the message
      */
     $scope.addMessage = function (_data, _selectedChat) {
-      var _selectedChat = _selectedChat || 'saturday-chat'
-      var ref = FirebaseDB.database().ref('Trash-Talk/' + _selectedChat);
-      ref.push({ 'player': 'fred', 'message': _data, 'when': new Date() });
+
+      Chats.add(_selectedChat, _data.value).then(function (_data, _error) {
+        if (!_error) {
+          console.log("saved..")
+          $timeout(function () {
+            $scope.inputtext = {}
+          }, 1);
+        }
+      })
 
     }
 
     function getFBChats(_selectedChat) {
 
-      var _selectedChat = _selectedChat || 'saturday-chat'
-
-      var ref = FirebaseDB.database().ref('Trash-Talk/' + _selectedChat);
-      ref.on("value", function (snapshot) {
-        console.log(snapshot.val());
-        var res = []
-        snapshot.forEach(function (_item) {
-          res.push({ player: _item.val().player, message: _item.val().message })
-        })
+      Chats.get(_selectedChat, function (_data) {
         $timeout(function () {
-          $scope.chats = res
+          $scope.chats = _data
         }, 1);
-      }, function (errorObject) {
-        console.log("The read failed: " + errorObject.code);
       });
     }
 
