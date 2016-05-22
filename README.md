@@ -15,7 +15,7 @@ cordova plugin add cordova-plugin-image-picker
 Follow the instructions for installing ngCordova
 [http://ngcordova.com/docs/install/](http://ngcordova.com/docs/install/)
 
-I am using the `fetch` polyfill in the application, 
+I am using the [`fetch`](https://github.com/github/fetch) polyfill in the application, needed it when testing in browser on Safari
 
 When you are all set up, the hed section in `index.html` file should look similar to this
 ```html
