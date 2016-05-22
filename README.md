@@ -102,7 +102,7 @@ I will discuss the specifics when covering authentication, but for the working w
   })
   ```
 
-### Login & Authentication
+### Authentication
   How this works...
   - Go to default route, `tab.chats`, when app starts up
   - If I have user, then I am happy and I list the data
