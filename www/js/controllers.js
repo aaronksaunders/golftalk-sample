@@ -24,6 +24,24 @@ angular.module('starter.controllers', [])
         });
 
       }
+      
+            /**
+       * 
+       */
+      $scope.doCreateUserAction = function (_credentials) {
+
+        FirebaseDB.createUser(_credentials).then(function (authData) {
+          console.log("Logged in as:", authData);
+          $state.go('tab.chats', {})
+        }).catch(function (error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.error("Authentication failed:", error);
+          // ...
+        });
+
+      }
     }])
 
   .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB, $cordovaImagePicker, $ionicPopup) {

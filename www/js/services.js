@@ -66,6 +66,25 @@ angular.module('starter.services', [])
           currentUser = authData
           return authData
         })
+      },
+      /**
+       * @param  {any} _credentials
+       */
+      createUser: function (_credentials) {
+        return firebase.auth().createUserWithEmailAndPassword(_credentials.email, _credentials.password).then(function (authData) {
+          currentUser = authData
+          return authData
+        }).then(function (authData) {
+
+          // add the user to a seperate list 
+          var ref = instance.database().ref('Trash-Talk/users');
+          return ref.child(authData.uid).set({
+            "provider": authData.providerData[0],
+            "avatar": (authData.profileImageURL || "missing"),
+            "displayName": authData.email
+          })
+
+        })
       }
     }
   })
