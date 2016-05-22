@@ -35,3 +35,145 @@ When you are all set up, the hed section in `index.html` file should look simila
 
   <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
 ```
+### Creating Service for Firebase
+
+**Please use your own keys...**
+
+I will discuss the specifics when covering authentication, but for the working with data I initialize the Firebase App and Firebase Storage and save them as properties of the factory to use later
+
+```Javascript
+  .factory('FirebaseDB', function ($q, $state, $timeout) {
+    var instance, storageInstance, unsubscribe, currentUser = null
+    var initialized = false
+
+    return {
+      initialize: function () {
+        return $q(function (resolve, reject) {
+
+          // if already initialized just let us know if there is a user or not
+          if (initialized) {
+            return !currentUser ? resolve(true) : resolve(false)
+          }
+
+          // Not initialized so... initialize Firebase
+          var config = {
+            apiKey: "AIzaSyCk9Lm0VUs",
+            authDomain: "newfirebaseapp.firebaseapp.com",
+            databaseURL: "https://newfirebaseapp.firebaseio.com",
+            storageBucket: "newfirebaseapp.appspot.com",
+          };
+
+          // initialize database and storage
+          instance = firebase.initializeApp(config);
+          storageInstance = firebase.storage();
+
+          // listen for authentication event, dont start app until I 
+          // get either true or false
+          $timeout(function () {
+            unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+              currentUser = user
+              if (!initialized) {
+                initialized = true;
+                return !currentUser ? resolve(true) : resolve(false)
+              }
+            })
+          }, 100);
+        })
+      },
+      /**
+       * return database instance
+       */
+      database: function () {
+        return instance.database()
+      },
+      /**
+      * return storage instance
+      */
+      storage: function () {
+        return storageInstance
+      },
+      /**
+       * return the currentUser object
+       */
+      currentUser: function () {
+        return currentUser
+      },
+    }
+  })
+  ```
+
+### Login & Authentication
+  How this works...
+  - Go to default route when app starts up
+  - If I have user, then I am happy and I list the data
+  - If I dont have user then resolve fails and login state is transistioned to
+  - In the login state, initialize the app and check for a user or not
+  - If I have a user then list state is transistioned to, otherwise display login screen
+
+
+### Create User
+coming soon...
+
+### Save Image
+
+First we use the image picker plugin to get the data
+```Javascript
+function pickTheImage() {
+  var options = {
+    maximumImagesCount: 1,
+    width: 320,
+    quality: 80
+  };
+
+  return $cordovaImagePicker.getPictures(options)
+    .then(function (results) {
+      for (var i = 0; i < results.length; i++) {
+        console.log('Image URI: ' + results[i]);
+      }
+      return results[0];
+
+    }, function (error) {
+      // error getting photos
+    });
+}
+```
+returns a promise when resolved, we have the path to the selected image which is what is passed into the following function `processImage()`
+
+Saving the image is two steps, save the image in the storage, and keep a reference to  the image in the database
+```Javascript
+function processImage(_image, _title) {
+
+  // Read image to get the blob for saving...
+  return fetch(_image).then(function (_data) {
+    return _data.blob()
+  }).then(function (_blob) {
+  
+  // (1) SAVE THE IMAGE
+    uploadTask = FirebaseDB.storage().ref('images/' + _title + '.jpg').put(_blob)
+
+    uploadTask.on('state_changed', function (snapshot) {
+      // Observe state change events such as progress, pause, and resume
+    }, function (error) {
+      // Handle unsuccessful uploads
+      return error
+    }, function () {
+      // Handle successful uploads on complete..
+      var downloadURL = uploadTask.snapshot.downloadURL;
+
+      // (2) SAVE A REFERENCE
+      var ref = FirebaseDB.database().ref('Trash-Talk/images');
+      ref.push({
+        'imageURL': downloadURL,
+        'owner': FirebaseDB.currentUser().uid,
+        'when': new Date().getTime(),
+      });
+
+      return downloadURL
+    });
+  })
+}
+```
+
+
+### Save Data
+coming soon...
