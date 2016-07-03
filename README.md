@@ -6,7 +6,7 @@ Sample Application using using the new features of Firebase - This is NOT using 
 - simple image object storage and retriveal in storage
 - application uses [Image-Picker Plugin](http://bit.ly/25a3xfG) to select images to upload
 
-### Setup Project
+## Setup Project
 
 Install the plugin
 ```
@@ -35,49 +35,60 @@ When you are all set up, the hed section in `index.html` file should look simila
 
   <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
 ```
-### Creating Service for Firebase
+
+## Initializing Firebase
+
+We do it **ONCE** in the run block of the application
+
+```JavaScript
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'ngCordova'])
+
+  .run(function ($ionicPlatform, FirebaseDB, $rootScope, $state) {
+
+    FirebaseDB.initialize();
+
+    // for authentication, managing the state if error..
+    $rootScope.$on('$stateChangeError',
+      function (event, toState, toParams, fromState, fromParams, error) {
+
+        // if the error is "NO USER" the go to login state
+        if (error === "NO USER") {
+          event.preventDefault();
+          $state.go('login', {});
+        }
+      });
+
+  })
+```
+
+## Creating Service for Firebase
 
 **Please use your own keys...**
 
 I will discuss the specifics when covering authentication, but for the working with data I initialize the Firebase App and Firebase Storage and save them as properties of the factory to use later
 
-```Javascript
+```JavaScript
   .factory('FirebaseDB', function ($q, $state, $timeout) {
     var instance, storageInstance, unsubscribe, currentUser = null
     var initialized = false
 
     return {
       initialize: function () {
-        return $q(function (resolve, reject) {
 
-          // if already initialized just let us know if there is a user or not
-          if (initialized) {
-            return !currentUser ? resolve(true) : resolve(false)
-          }
+        // Not initialized so... initialize Firebase
+        var config = {
+            //SET YOUR CONFIG BLOCK HERE
+        };
 
-          // Not initialized so... initialize Firebase
-          var config = {
-            apiKey: "AIzaSyCk9Lm0VUs",
-            authDomain: "newfirebaseapp.firebaseapp.com",
-            databaseURL: "https://newfirebaseapp.firebaseio.com",
-            storageBucket: "newfirebaseapp.appspot.com",
-          };
+        // initialize database and storage
+        instance = firebase.initializeApp(config);
+        storageInstance = firebase.storage();
 
-          // initialize database and storage
-          instance = firebase.initializeApp(config);
-          storageInstance = firebase.storage();
-
-          // listen for authentication event, dont start app until I 
-          // get either true or false
-          $timeout(function () {
-            unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
-              currentUser = user
-              if (!initialized) {
-                initialized = true;
-                return !currentUser ? resolve(true) : resolve(false)
-              }
-            })
-          }, 100);
+        // listen for authentication event, dont start app until I 
+        // get either true or false
+        unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+          currentUser = user
+          console.log("got user..", currentUser);
         })
       },
       /**
@@ -92,17 +103,53 @@ I will discuss the specifics when covering authentication, but for the working w
       storage: function () {
         return storageInstance
       },
+      isAuth: function () {
+        return $q(function (resolve, reject) {
+          return firebase.auth().currentUser ? resolve(true) : reject("NO USER")
+        })
+      },
       /**
        * return the currentUser object
        */
       currentUser: function () {
-        return currentUser
+        debugger;
+        return firebase.auth().currentUser
       },
+
+      /**
+       * @param  {any} _credentials
+       */
+      login: function (_credentials) {
+        return firebase.auth().signInWithEmailAndPassword(_credentials.email, _credentials.password)
+          .then(function (authData) {
+            currentUser = authData
+            return authData
+          })
+      },
+      /**
+       * @param  {any} _credentials
+       */
+      createUser: function (_credentials) {
+        return firebase.auth().createUserWithEmailAndPassword(_credentials.email, _credentials.password).then(function (authData) {
+          currentUser = authData
+          return authData
+        }).then(function (authData) {
+
+          // add the user to a seperate list 
+          var ref = instance.database().ref('Trash-Talk/users');
+          return ref.child(authData.uid).set({
+            "provider": authData.providerData[0],
+            "avatar": (authData.profileImageURL || "missing"),
+            "displayName": authData.email
+          })
+
+        })
+      }
     }
   })
   ```
 
-### Authentication
+## Authentication
   How this works...
   - Go to default route, `tab.chats`, when app starts up
   - If I have user, then I am happy and I list the data
@@ -111,10 +158,10 @@ I will discuss the specifics when covering authentication, but for the working w
   - If I have a user then list state, `tab.chats`, is transistioned to, otherwise display login screen from `login` state
 
 
-### Create User
+## Create User
 coming soon...
 
-### Save Image
+## Save Image
 
 First we use the image picker plugin to get the data
 ```Javascript
@@ -175,5 +222,5 @@ function processImage(_image, _title) {
 ```
 
 
-### Save Data
+## Save Data
 coming soon...
