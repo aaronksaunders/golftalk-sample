@@ -9,10 +9,7 @@ angular.module('starter.services', [])
 
         // Not initialized so... initialize Firebase
         var config = {
-          apiKey: "AIzaSyCk6N39ZJkb-gM2EBTg2fSiwbvk9Lm0VUs",
-          authDomain: "newfirebaseapp-2ee6f.firebaseapp.com",
-          databaseURL: "https://newfirebaseapp-2ee6f.firebaseio.com",
-          storageBucket: "newfirebaseapp-2ee6f.appspot.com",
+          // YOUR OPTIONS
         };
 
         // initialize database and storage
