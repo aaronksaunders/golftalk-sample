@@ -6,37 +6,21 @@ angular.module('starter.services', [])
 
     return {
       initialize: function () {
-        return $q(function (resolve, reject) {
 
-          // if already initialized just let us know if there is a user or not
-          if (initialized) {
-            return !currentUser ? resolve(true) : resolve(false)
-          }
+        // Not initialized so... initialize Firebase
+        var config = {
+            //SET YOUR CONFIG BLOCK HERE
+        };
 
-          // Not initialized so... initialize Firebase
-          var config = {
-            apiKey: "AIzaSyCk6N39ZJkb-gM2EBTg2fSiwbvk9Lm0VUs",
-            authDomain: "newfirebaseapp-2ee6f.firebaseapp.com",
-            databaseURL: "https://newfirebaseapp-2ee6f.firebaseio.com",
-            storageBucket: "newfirebaseapp-2ee6f.appspot.com",
-          };
+        // initialize database and storage
+        instance = firebase.initializeApp(config);
+        storageInstance = firebase.storage();
 
-          // initialize database and storage
-          instance = firebase.initializeApp(config);
-          storageInstance = firebase.storage();
-
-          // listen for authentication event, dont start app until I 
-          // get either true or false
-          $timeout(function () {
-            unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
-              currentUser = user
-              console.log("got user..", currentUser);
-              if (!initialized) {
-                initialized = true;
-                return !currentUser ? resolve(true) : resolve(false)
-              }
-            })
-          }, 100);
+        // listen for authentication event, dont start app until I 
+        // get either true or false
+        unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+          currentUser = user
+          console.log("got user..", currentUser);
         })
       },
       /**
@@ -51,21 +35,28 @@ angular.module('starter.services', [])
       storage: function () {
         return storageInstance
       },
+      isAuth: function () {
+        return $q(function (resolve, reject) {
+          return firebase.auth().currentUser ? resolve(true) : reject("NO USER")
+        })
+      },
       /**
        * return the currentUser object
        */
       currentUser: function () {
-        return currentUser
+        debugger;
+        return firebase.auth().currentUser
       },
 
       /**
        * @param  {any} _credentials
        */
       login: function (_credentials) {
-        return firebase.auth().signInWithEmailAndPassword(_credentials.email, _credentials.password).then(function (authData) {
-          currentUser = authData
-          return authData
-        })
+        return firebase.auth().signInWithEmailAndPassword(_credentials.email, _credentials.password)
+          .then(function (authData) {
+            currentUser = authData
+            return authData
+          })
       },
       /**
        * @param  {any} _credentials

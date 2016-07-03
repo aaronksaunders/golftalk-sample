@@ -22,6 +22,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     });
 
+    FirebaseDB.initialize();
+
     // for authentication
     $rootScope.$on('$stateChangeError',
       function (event, toState, toParams, fromState, fromParams, error) {
@@ -47,20 +49,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         url: "/login",
         templateUrl: "templates/login.html",
         controller: 'LoginCtrl',
-        cache: false,
-        resolve: {
-          user: function (FirebaseDB, $state) {
-            return FirebaseDB.initialize().then(function (_response) {
-              if (_response) {
-                // no user, do the login
-                return true
-              } else {
-                // go user, goto chats
-                $state.go('tab.chats')
-              }
-            })
-          }
-        }
+        cache: false
       })
       // setup an abstract state for the tabs directive
       .state('tab', {
@@ -69,7 +58,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
         templateUrl: 'templates/tabs.html',
         resolve: {
           user: ['FirebaseDB', '$q', function (FirebaseDB, $q) {
-
             var authData = FirebaseDB.currentUser();
             return $q(function (resolve, reject) {
               authData ? resolve(authData) : reject("NO USER")
