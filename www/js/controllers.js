@@ -44,7 +44,7 @@ angular.module('starter.controllers', [])
       }
     }])
 
-  .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB, $cordovaImagePicker, $ionicPopup) {
+  .controller('PhotosCtrl', function ($scope, $timeout, FirebaseDB, $cordovaImagePicker, $ionicPopup, $ionicPlatform) {
 
     function pickTheImage() {
       var options = {
@@ -70,6 +70,11 @@ angular.module('starter.controllers', [])
      * @param  {any} _title
      */
     function processImage(_image, _title) {
+
+      // modify the image path when on Android
+      if ($ionicPlatform.is("android")) {
+        _image = "file://" + _image
+      }
 
       return fetch(_image).then(function (_data) {
         return _data.blob()
